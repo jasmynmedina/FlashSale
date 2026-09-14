@@ -6,7 +6,10 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
 
-        FlashSaleService flashSale = new FlashSaleService();
+        ProductRepository productRepository = new InMemoryProductRepository();
+        CustomerRepository customerRepository = new InMemoryCustomerRepository();
+        OrderRepository orderRepository = new InMemoryOrderRepository();
+        FlashSaleService flashSale = new FlashSaleService(productRepository, customerRepository, orderRepository);
 
         Product product1 = new Product(1, "Planner Notebook", 39.99, 3);
         Product product2 = new Product(2, "Scrapbook", 30.99, 4);

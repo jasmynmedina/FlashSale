@@ -1,45 +1,38 @@
-import java.util.ArrayList;
+import java.util.List;
 
 public class FlashSaleService {
     private int nextOrderId;
     private int nextCustomerId;
-    private ArrayList<Product> products;
-    private ArrayList<Customer> customers;
-    private ArrayList<Order> orders;
+    private ProductRepository productRepository;
+    private CustomerRepository customerRepository;
+    private OrderRepository orderRepository;
 
-    public FlashSaleService() {
+    public FlashSaleService(ProductRepository productRepository, CustomerRepository customerRepository, OrderRepository orderRepository) {
+        this.productRepository = productRepository;
+        this.customerRepository = customerRepository;
+        this.orderRepository = orderRepository;
         this.nextOrderId = 1;
         this.nextCustomerId = 1;
-        this.products = new ArrayList<>();
-        this.customers = new ArrayList<>();
-        this.orders = new ArrayList<>();
     }
 
     public void addProduct(Product product) {
-        products.add(product);
+        productRepository.save(product);
     }
 
-    public ArrayList<Product> getProducts() {
-        return products;
+    public List<Product> getProducts() {
+        return productRepository.findAll();
+    }
+
+    public List<Order> getOrders() {
+        return orderRepository.findAll();
     }
 
     public Product findProduct(String searchName) {
-        for (Product item : products) {
-            if (item.getName().equalsIgnoreCase(searchName)) {
-                return item;
-            }
-        }
-        return null;
+        return productRepository.findByName(searchName);
     }
 
     public Customer findCustomer(String customerName) {
-        for (Customer customer : customers) {
-            if (customer.getName().equalsIgnoreCase(customerName)) {
-                return customer;
-            }
-        }
-
-        return null;
+        return customerRepository.findByName(customerName);
     }
 
     public PurchaseStatus attemptPurchase(Customer customer, Product product) {
@@ -52,7 +45,7 @@ public class FlashSaleService {
         if (successful) {
             Order order = new Order(nextOrderId, customer, product, product.getPrice());
             nextOrderId++;
-            orders.add(order);
+            orderRepository.save(order);
             return PurchaseStatus.SUCCESS;
         }
         else {
@@ -60,25 +53,14 @@ public class FlashSaleService {
         }
     }
 
-    public ArrayList<Order> getOrders() {
-        return orders;
-    }
-
     public boolean hasPurchasedProduct(Customer customer, Product product) {
-        for (Order order : orders) {
-            if (order.getCustomer().getId() == customer.getId()
-                    && order.getProduct().getId() == product.getId()) {
-                return true;
-            }
-        }
-
-        return false;
+        return orderRepository.existsByCustomerAndProduct(customer, product);
     }
 
     public Customer createCustomer(String customerName) {
         Customer customer = new Customer(nextCustomerId, customerName);
         nextCustomerId++;
-        customers.add(customer);
+        customerRepository.save(customer);
         return customer;
     }
 }
