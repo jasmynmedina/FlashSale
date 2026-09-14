@@ -1,11 +1,15 @@
 import java.util.ArrayList;
 
 public class FlashSaleService {
+    private int nextOrderId;
+    private int nextCustomerId;
     private ArrayList<Product> products;
     private ArrayList<Customer> customers;
     private ArrayList<Order> orders;
 
     public FlashSaleService() {
+        this.nextOrderId = 1;
+        this.nextCustomerId = 1;
         this.products = new ArrayList<>();
         this.customers = new ArrayList<>();
         this.orders = new ArrayList<>();
@@ -38,32 +42,43 @@ public class FlashSaleService {
         return null;
     }
 
-    public void addCustomer(Customer customer) {
-        customers.add(customer);
-    }
-
-    public Order attemptPurchase(Customer customer, Product product) {
-        if (customer.hasPurchased()) {
-            System.out.println("----PURCHASE DENIED - LIMIT REACHED----");
-            return null;
+    public PurchaseStatus attemptPurchase(Customer customer, Product product) {
+        if (hasPurchasedProduct(customer, product)) {
+            return PurchaseStatus.LIMIT_REACHED;
         }
 
         boolean successful = product.purchase();
 
         if (successful) {
-            customer.markPurchased();
-            Order order = new Order(customer, product, product.getPrice());
+            Order order = new Order(nextOrderId, customer, product, product.getPrice());
+            nextOrderId++;
             orders.add(order);
-            System.out.println("----PURCHASE SUCCESSFUL----");
-            return order;
+            return PurchaseStatus.SUCCESS;
         }
         else {
-            System.out.println("----SOLD OUT----");
-            return null;
+            return PurchaseStatus.SOLD_OUT;
         }
     }
 
     public ArrayList<Order> getOrders() {
         return orders;
+    }
+
+    public boolean hasPurchasedProduct(Customer customer, Product product) {
+        for (Order order : orders) {
+            if (order.getCustomer().getId() == customer.getId()
+                    && order.getProduct().getId() == product.getId()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Customer createCustomer(String customerName) {
+        Customer customer = new Customer(nextCustomerId, customerName);
+        nextCustomerId++;
+        customers.add(customer);
+        return customer;
     }
 }

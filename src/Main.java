@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
@@ -9,9 +8,9 @@ public class Main {
 
         FlashSaleService flashSale = new FlashSaleService();
 
-        Product product1 = new Product("Planner Notebook", 39.99, 3);
-        Product product2 = new Product("Scrapbook", 30.99, 4);
-        Product product3 = new Product("Ribbon", 12.50, 3);
+        Product product1 = new Product(1, "Planner Notebook", 39.99, 3);
+        Product product2 = new Product(2, "Scrapbook", 30.99, 4);
+        Product product3 = new Product(3, "Ribbon", 12.50, 3);
 
         flashSale.addProduct(product1);
         flashSale.addProduct(product2);
@@ -40,8 +39,7 @@ public class Main {
             Customer customer = flashSale.findCustomer(customerName);
 
             if (customer == null) {
-                customer = new Customer(customerName);
-                flashSale.addCustomer(customer);
+                customer = flashSale.createCustomer(customerName);
             }
 
             System.out.println("Welcome " + customer.getName() + "!");
@@ -60,14 +58,19 @@ public class Main {
                 System.out.println("Inventory: " + selectedProduct.getInventory());
                 System.out.println();
 
-                flashSale.attemptPurchase(customer, selectedProduct);
+                PurchaseStatus status = flashSale.attemptPurchase(customer, selectedProduct);
 
-                System.out.println(
-                        "Remaining Inventory: "
-                                + selectedProduct.getInventory()
-                );
+                if (status == PurchaseStatus.SUCCESS) {
+                    System.out.println("----PURCHASE SUCCESSFUL----");
+                } else if (status == PurchaseStatus.SOLD_OUT) {
+                    System.out.println("----SOLD OUT----");
+                } else if (status == PurchaseStatus.LIMIT_REACHED) {
+                    System.out.println("----PURCHASE DENIED - PRODUCT LIMIT REACHED----");
+                }
 
-            } else {
+                System.out.println("Remaining Inventory: " + selectedProduct.getInventory());
+            }
+            else {
                 System.out.println("Product not found.");
             }
 
