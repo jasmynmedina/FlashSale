@@ -7,17 +7,15 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
 
-        ArrayList<Product> products = new ArrayList<>();
-        ArrayList<Customer> customers = new ArrayList<>();
-        ArrayList<Order> orders = new ArrayList<>();
+        FlashSaleService flashSale = new FlashSaleService();
 
         Product product1 = new Product("Planner Notebook", 39.99, 3);
         Product product2 = new Product("Scrapbook", 30.99, 4);
         Product product3 = new Product("Ribbon", 12.50, 3);
 
-        products.add(product1);
-        products.add(product2);
-        products.add(product3);
+        flashSale.addProduct(product1);
+        flashSale.addProduct(product2);
+        flashSale.addProduct(product3);
 
         boolean running = true;
 
@@ -29,7 +27,7 @@ public class Main {
 
             System.out.println("----PRODUCTS AVAILABLE----");
 
-            for (Product item : products) {
+            for (Product item : flashSale.getProducts()) {
                 System.out.println("Product: " + item.getName());
                 System.out.println("Price: $" + item.getPrice());
                 System.out.println("Inventory: " + item.getInventory());
@@ -39,11 +37,11 @@ public class Main {
             System.out.println("Enter Customer Name: ");
             String customerName = scanner.nextLine();
 
-            Customer customer = findCustomer(customers, customerName);
+            Customer customer = flashSale.findCustomer(customerName);
 
             if (customer == null) {
                 customer = new Customer(customerName);
-                customers.add(customer);
+                flashSale.addCustomer(customer);
             }
 
             System.out.println("Welcome " + customer.getName() + "!");
@@ -52,7 +50,7 @@ public class Main {
             System.out.println("Enter Product Name: ");
             String searchName = scanner.nextLine();
 
-            Product selectedProduct = findProduct(products, searchName);
+            Product selectedProduct = flashSale.findProduct(searchName);
 
             if (selectedProduct != null) {
 
@@ -62,11 +60,7 @@ public class Main {
                 System.out.println("Inventory: " + selectedProduct.getInventory());
                 System.out.println();
 
-                Order order = attemptPurchase(customer, selectedProduct);
-
-                if (order != null) {
-                    orders.add(order);
-                }
+                flashSale.attemptPurchase(customer, selectedProduct);
 
                 System.out.println(
                         "Remaining Inventory: "
@@ -89,7 +83,7 @@ public class Main {
         System.out.println();
         System.out.println("========== ORDER SUMMARY ==========");
 
-        for (Order order : orders) {
+        for (Order order : flashSale.getOrders()) {
             System.out.println(
                     order.getCustomer().getName()
                             + " purchased "
@@ -100,75 +94,8 @@ public class Main {
         }
 
         System.out.println();
-        System.out.println("Total Orders: " + orders.size());
+        System.out.println("Total Orders: " + flashSale.getOrders().size());
 
         scanner.close();
-    }
-
-    public static Product findProduct(
-            ArrayList<Product> products,
-            String searchName) {
-
-        for (Product item : products) {
-
-            if (item.getName().equalsIgnoreCase(searchName)) {
-                return item;
-            }
-        }
-
-        return null;
-    }
-
-    public static Customer findCustomer(
-            ArrayList<Customer> customers,
-            String customerName) {
-
-        for (Customer customer : customers) {
-
-            if (customer.getName().equalsIgnoreCase(customerName)) {
-                return customer;
-            }
-        }
-
-        return null;
-    }
-
-    public static Order attemptPurchase(
-            Customer customer,
-            Product product) {
-
-        if (customer.hasPurchased()) {
-
-            System.out.println(
-                    "----PURCHASE DENIED - LIMIT REACHED----"
-            );
-
-            return null;
-        }
-
-        boolean successful = product.purchase();
-
-        if (successful) {
-
-            customer.markPurchased();
-
-            System.out.println(
-                    "----PURCHASE SUCCESSFUL----"
-            );
-
-            return new Order(
-                    customer,
-                    product,
-                    product.getPrice()
-            );
-
-        } else {
-
-            System.out.println(
-                    "----SOLD OUT----"
-            );
-
-            return null;
-        }
     }
 }
